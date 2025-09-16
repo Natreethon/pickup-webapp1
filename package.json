@@ -1,0 +1,12 @@
+{
+  "name": "pickup-webapp",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "sync": "node scripts/sync-from-sheets.mjs"
+  },
+  "dependencies": {
+    "papaparse": "^5.4.1",
+    "node-fetch": "^3.3.2"
+  }
+}
