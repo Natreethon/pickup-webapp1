@@ -1,0 +1,14 @@
+[
+  {
+    "Driver ID": "101",
+    "Pickup Point ID": "PUP001",
+    "Store Name": "Cafe Amazon",
+    "StoreAddress": "Bangkok"
+  },
+  {
+    "Driver ID": "102",
+    "Pickup Point ID": "PUP002",
+    "Store Name": "7-Eleven",
+    "StoreAddress": "Chiang Mai"
+  }
+]

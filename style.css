@@ -1,0 +1,5 @@
+
+body { font-family: 'Sarabun', sans-serif; }
+.tab-btn { padding: 0.5rem 1rem; border-radius: 0.5rem; }
+.tab-btn.active { background: #6366f1; color: white; }
+#chatbot { display: flex; flex-direction: column; }

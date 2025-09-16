@@ -1,0 +1,12 @@
+[
+  {
+    "Pickup Point ID": "PUP001",
+    "Pickup Point Name": "Cafe Amazon",
+    "Text Address": "Bangkok"
+  },
+  {
+    "Pickup Point ID": "PUP002",
+    "Pickup Point Name": "7-Eleven",
+    "Text Address": "Chiang Mai"
+  }
+]

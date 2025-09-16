@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pickup Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="style.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers/dist/transformers.min.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <div class="container mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-4">ระบบจัดการ Pickup Points</h1>
+    <nav class="flex space-x-4 mb-6">
+      <button id="tab-dashboard" class="tab-btn active">Dashboard</button>
+      <button id="tab-employees" class="tab-btn">พนักงาน</button>
+      <button id="tab-points" class="tab-btn">Pickup Points</button>
+    </nav>
+    <div id="content"></div>
+  </div>
+
+  <!-- Chatbot floating button -->
+  <button id="chatbot-toggle" class="fixed bottom-6 right-6 bg-indigo-600 text-white rounded-full p-4 shadow-lg">💬</button>
+  <div id="chatbot" class="hidden fixed bottom-20 right-6 bg-white w-80 h-96 shadow-xl rounded-lg flex flex-col">
+    <div class="p-3 border-b font-bold">AI Chatbot</div>
+    <div id="chat-messages" class="flex-1 p-3 overflow-y-auto text-sm"></div>
+    <div class="p-2 border-t flex">
+      <input id="chat-input" type="text" placeholder="พิมพ์ข้อความ..." class="flex-1 border rounded px-2 py-1 text-sm">
+      <button id="chat-send" class="ml-2 bg-indigo-600 text-white px-3 py-1 rounded">ส่ง</button>
+    </div>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
