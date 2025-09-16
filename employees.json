@@ -1,18 +1,44 @@
 [
   {
-    "Driver ID": "101",
-    "Driver Name": "สมชาย ใจดี",
-    "Shift Time": "11:00",
-    "Holiday": [
-      "Sun"
-    ]
+    "driverId": "101",
+    "driverName": "Somchai",
+    "shiftTime": "Morning",
+    "holidays": [
+      "2024-07-01"
+    ],
+    "pickupPoints": [
+      {
+        "id": "PUP001",
+        "store": "Cafe Amazon",
+        "address": "Bangkok"
+      },
+      {
+        "id": "PUP002",
+        "store": "7-Eleven",
+        "address": "Chiang Mai"
+      }
+    ],
+    "pointCounts": {
+      "PUP001": 1,
+      "PUP002": 1
+    }
   },
   {
-    "Driver ID": "102",
-    "Driver Name": "สมหญิง แข็งแรง",
-    "Shift Time": "14:00",
-    "Holiday": [
-      "Sat"
-    ]
+    "driverId": "102",
+    "driverName": "Suda",
+    "shiftTime": "Evening",
+    "holidays": [
+      "2024-07-02"
+    ],
+    "pickupPoints": [
+      {
+        "id": "PUP002",
+        "store": "7-Eleven",
+        "address": "Chiang Mai"
+      }
+    ],
+    "pointCounts": {
+      "PUP002": 1
+    }
   }
 ]
