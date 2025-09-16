@@ -4,6 +4,7 @@ let employees = [];
 let pickupPoints = [];
 let assignments = [];
 let generator = null;
+const content = document.getElementById("content");
 
 async function loadData() {
   employees = await fetch("employees.json").then(r=>r.json());
@@ -13,7 +14,6 @@ async function loadData() {
 }
 
 function renderDashboard() {
-  const content = document.getElementById("content");
   content.innerHTML = `
     <div class="bg-white p-4 rounded shadow">
       <h2 class="font-bold mb-2">ภาพรวม</h2>
@@ -25,19 +25,41 @@ function renderDashboard() {
 }
 
 function renderEmployees() {
-  const content = document.getElementById("content");
-  content.innerHTML = `<h2 class="font-bold mb-2">ข้อมูลพนักงาน</h2>` +
-    `<ul>` +
-    employees.map(e => `<li>${e["Driver ID"]}: ${e["Driver Name"]} (Shift ${e["Shift Time"]})</li>`).join("") +
-    `</ul>`;
+  content.innerHTML = `
+    <h2 class="font-bold mb-2">ข้อมูลพนักงาน</h2>
+    <ul class="list-with-actions">
+      ${employees.map(e => {
+        const id = e["Driver ID"];
+        const name = e["Driver Name"];
+        const shift = e["Shift Time"];
+        return `
+          <li class="list-item">
+            <span class="item-text">${id}: ${name} (Shift ${shift})</span>
+            <button class="copy-driver" data-value="${id}">คัดลอก</button>
+          </li>
+        `;
+      }).join("")}
+    </ul>
+  `;
 }
 
 function renderPoints() {
-  const content = document.getElementById("content");
-  content.innerHTML = `<h2 class="font-bold mb-2">Pickup Points</h2>` +
-    `<ul>` +
-    pickupPoints.map(p => `<li>${p["Pickup Point ID"]}: ${p["Pickup Point Name"]} - ${p["Text Address"]}</li>`).join("") +
-    `</ul>`;
+  content.innerHTML = `
+    <h2 class="font-bold mb-2">Pickup Points</h2>
+    <ul class="list-with-actions">
+      ${pickupPoints.map(p => {
+        const id = p["Pickup Point ID"];
+        const name = p["Pickup Point Name"];
+        const address = p["Text Address"];
+        return `
+          <li class="list-item">
+            <span class="item-text">${id}: ${name} - ${address}</span>
+            <button class="copy-point" data-value="${id}">คัดลอก</button>
+          </li>
+        `;
+      }).join("")}
+    </ul>
+  `;
 }
 
 // Tabs
@@ -59,6 +81,42 @@ function setActive(id){
 // Chatbot
 document.getElementById("chatbot-toggle").addEventListener("click", ()=>{
   document.getElementById("chatbot").classList.toggle("hidden");
+});
+
+content.addEventListener("click", async (event) => {
+  const button = event.target.closest(".copy-driver, .copy-point");
+  if (!button || !content.contains(button)) {
+    return;
+  }
+
+  const value = button.dataset.value;
+  if (!value) {
+    return;
+  }
+
+  const originalText = button.textContent;
+  button.disabled = true;
+
+  try {
+    if (!navigator?.clipboard?.writeText) {
+      throw new Error("Clipboard API unavailable");
+    }
+
+    await navigator.clipboard.writeText(value);
+    button.textContent = "คัดลอกแล้ว!";
+    button.classList.add("copied");
+  } catch (error) {
+    console.error("ไม่สามารถคัดลอกได้", error);
+    button.textContent = "คัดลอกไม่สำเร็จ";
+    button.classList.add("copy-error");
+    alert("ไม่สามารถคัดลอกอัตโนมัติได้ กรุณาคัดลอกด้วยตนเอง");
+  }
+
+  setTimeout(() => {
+    button.textContent = originalText;
+    button.disabled = false;
+    button.classList.remove("copied", "copy-error");
+  }, 2000);
 });
 
 document.getElementById("chat-send").addEventListener("click", async ()=>{

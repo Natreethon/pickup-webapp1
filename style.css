@@ -3,3 +3,58 @@ body { font-family: 'Sarabun', sans-serif; }
 .tab-btn { padding: 0.5rem 1rem; border-radius: 0.5rem; }
 .tab-btn.active { background: #6366f1; color: white; }
 #chatbot { display: flex; flex-direction: column; }
+
+.list-with-actions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.list-with-actions .list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.list-with-actions .list-item:last-child {
+  border-bottom: none;
+}
+
+.list-with-actions .item-text {
+  flex: 1;
+}
+
+.copy-driver,
+.copy-point {
+  background-color: #e0e7ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 0.375rem;
+  color: #312e81;
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0.25rem 0.75rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.copy-driver:hover,
+.copy-point:hover {
+  background-color: #6366f1;
+  color: #ffffff;
+}
+
+.copy-driver.copied,
+.copy-point.copied {
+  background-color: #4ade80;
+  border-color: #22c55e;
+  color: #065f46;
+}
+
+.copy-driver.copy-error,
+.copy-point.copy-error {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
