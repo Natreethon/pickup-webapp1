@@ -3,3 +3,50 @@ body { font-family: 'Sarabun', sans-serif; }
 .tab-btn { padding: 0.5rem 1rem; border-radius: 0.5rem; }
 .tab-btn.active { background: #6366f1; color: white; }
 #chatbot { display: flex; flex-direction: column; }
+
+.copy-button {
+  padding: 0.35rem 0.9rem;
+  border-radius: 0.5rem;
+  border: 1px solid #4f46e5;
+  background: #fff;
+  color: #4f46e5;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.copy-button:hover,
+.copy-button:focus-visible {
+  background: #4f46e5;
+  color: #fff;
+}
+
+.copy-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.35);
+}
+
+.copy-feedback {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  background: #4f46e5;
+  color: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 50;
+}
+
+.copy-feedback.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.copy-feedback.error {
+  background: #dc2626;
+}
