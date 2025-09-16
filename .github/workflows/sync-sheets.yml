@@ -1,1 +1,38 @@
+name: Sync Sheets to JSON
 
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 18 * * *"   # รันทุกวัน 01:00 น. เวลาไทย
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install deps
+        run: npm ci || npm i
+
+      - name: Run sync script
+        env:
+          EMPLOYEES_CSV_URL: ${{ secrets.EMPLOYEES_CSV_URL }}
+          PICKUP_POINTS_CSV_URL: ${{ secrets.PICKUP_POINTS_CSV_URL }}
+          ASSIGNMENTS_CSV_URL: ${{ secrets.ASSIGNMENTS_CSV_URL }}
+        run: npm run sync
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git add data/*.json
+            git commit -m "chore: sync data from Google Sheets"
+            git push
+          fi
