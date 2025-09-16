@@ -28,7 +28,28 @@ function renderEmployees() {
   const content = document.getElementById("content");
   content.innerHTML = `<h2 class="font-bold mb-2">ข้อมูลพนักงาน</h2>` +
     `<ul>` +
-    employees.map(e => `<li>${e["Driver ID"]}: ${e["Driver Name"]} (Shift ${e["Shift Time"]})</li>`).join("") +
+    employees.map(e => {
+      const id = e["Driver ID"] ?? e.driverId ?? "-";
+      const name = e["Driver Name"] ?? e.driverName ?? "-";
+      const shift = e["Shift Time"] ?? e.shiftTime ?? "-";
+      const holidaysRaw = e["Holiday"] ?? e["HolidayDate"] ?? e.holidays;
+      let holidays = "";
+      if (Array.isArray(holidaysRaw) && holidaysRaw.length) {
+        holidays = ` | วันหยุด: ${holidaysRaw.join(", ")}`;
+      } else if (typeof holidaysRaw === "string" && holidaysRaw.trim()) {
+        holidays = ` | วันหยุด: ${holidaysRaw}`;
+      }
+      let pickupPoints = "";
+      if (Array.isArray(e.pickupPoints) && e.pickupPoints.length) {
+        const points = e.pickupPoints.map(p => {
+          const idText = p.id ?? p["Pickup Point ID"] ?? "";
+          const nameText = p.store ?? p["Pickup Point Name"] ?? "";
+          return nameText ? `${idText} (${nameText})` : idText;
+        }).filter(Boolean).join(", ");
+        if (points) pickupPoints = ` | จุดรับ: ${points}`;
+      }
+      return `<li>${id}: ${name} (Shift ${shift})${holidays}${pickupPoints}</li>`;
+    }).join("") +
     `</ul>`;
 }
 

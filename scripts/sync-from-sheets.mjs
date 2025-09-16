@@ -58,13 +58,11 @@ async function main() {
     fetchCSV(ASSIGNMENTS_CSV_URL)
   ]);
 
-  await fs.mkdir('data', { recursive: true });
-
-  await fs.writeFile('data/employee_assignments.json', JSON.stringify(assignmentsSheet, null, 2));
-  await fs.writeFile('data/pickup_points.json', JSON.stringify(pickupPointsSheet, null, 2));
+  await fs.writeFile('employee_assignments.json', JSON.stringify(assignmentsSheet, null, 2));
+  await fs.writeFile('pickup_points.json', JSON.stringify(pickupPointsSheet, null, 2));
   const employeesAgg = toEmployeesAggregated(assignmentsSheet);
-  await fs.writeFile('data/employees.json', JSON.stringify(employeesAgg, null, 2));
+  await fs.writeFile('employees.json', JSON.stringify(employeesAgg, null, 2));
 
-  console.log('✅ Synced data/*.json updated');
+  console.log('✅ Synced *.json updated');
 }
 main().catch(e => { console.error(e); process.exit(1); });
