@@ -26,10 +26,65 @@ function renderDashboard() {
 
 function renderEmployees() {
   const content = document.getElementById("content");
-  content.innerHTML = `<h2 class="font-bold mb-2">ข้อมูลพนักงาน</h2>` +
-    `<ul>` +
-    employees.map(e => `<li>${e["Driver ID"]}: ${e["Driver Name"]} (Shift ${e["Shift Time"]})</li>`).join("") +
-    `</ul>`;
+  if (!employees.length) {
+    content.innerHTML = `<h2 class="font-bold mb-2">ข้อมูลพนักงาน</h2><p>ไม่พบข้อมูลพนักงาน</p>`;
+    return;
+  }
+
+  const cards = employees.map(e => {
+    const driverId = e.driverId ?? e["Driver ID"] ?? "-";
+    const driverName = e.driverName ?? e["Driver Name"] ?? "ไม่ทราบชื่อ";
+    const shiftTime = e.shiftTime ?? e["Shift Time"] ?? "-";
+
+    const holidays = Array.isArray(e.holidays)
+      ? e.holidays
+      : Array.isArray(e.Holiday)
+        ? e.Holiday
+        : [];
+    const pickupPoints = Array.isArray(e.pickupPoints)
+      ? e.pickupPoints
+      : [];
+
+    const holidaysHtml = holidays.length
+      ? holidays.join(", ")
+      : "ไม่มีข้อมูล";
+
+    const pickupHtml = pickupPoints.length
+      ? `<ul class="list-disc list-inside space-y-1">${pickupPoints
+          .map(p => `<li><span class="font-semibold">${p.store || p.name || p.id}</span>${p.address ? ` — ${p.address}` : ""}</li>`)
+          .join("")}</ul>`
+      : `<p class="text-sm text-gray-500">ยังไม่มีจุดรับสินค้า</p>`;
+
+    return `
+      <article class="border rounded-lg p-4 shadow-sm bg-white">
+        <header class="mb-2">
+          <h3 class="text-lg font-semibold">${driverName}</h3>
+          <p class="text-sm text-gray-500">รหัสพนักงาน: ${driverId}</p>
+        </header>
+        <dl class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <dt class="font-medium">รอบเวลา</dt>
+            <dd>${shiftTime || "-"}</dd>
+          </div>
+          <div>
+            <dt class="font-medium">วันหยุด</dt>
+            <dd>${holidaysHtml}</dd>
+          </div>
+          <div>
+            <dt class="font-medium mb-1">จุดรับสินค้า</dt>
+            <dd>${pickupHtml}</dd>
+          </div>
+        </dl>
+      </article>
+    `;
+  }).join("");
+
+  content.innerHTML = `
+    <h2 class="font-bold mb-4">ข้อมูลพนักงาน</h2>
+    <section class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      ${cards}
+    </section>
+  `;
 }
 
 function renderPoints() {
