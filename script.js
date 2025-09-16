@@ -6,9 +6,9 @@ let assignments = [];
 let generator = null;
 
 async function loadData() {
-  employees = await fetch("data/employees.json").then(r=>r.json());
-  pickupPoints = await fetch("data/pickup_points.json").then(r=>r.json());
-  assignments = await fetch("data/employee_assignments.json").then(r=>r.json());
+  employees = await fetch("employees.json").then(r=>r.json());
+  pickupPoints = await fetch("pickup_points.json").then(r=>r.json());
+  assignments = await fetch("employee_assignments.json").then(r=>r.json());
   renderDashboard();
 }
 
