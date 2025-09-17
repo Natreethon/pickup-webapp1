@@ -1,35 +1,207 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pickup Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="style.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers/dist/transformers.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ข้อมูล Pickup Points พนักงาน</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-50 text-gray-800">
-  <div class="container mx-auto p-6">
-    <h1 class="text-2xl font-bold mb-4">ระบบจัดการ Pickup Points</h1>
-    <nav class="flex space-x-4 mb-6">
-      <button id="tab-dashboard" class="tab-btn active">Dashboard</button>
-      <button id="tab-employees" class="tab-btn">พนักงาน</button>
-      <button id="tab-points" class="tab-btn">Pickup Points</button>
-    </nav>
-    <div id="content"></div>
-  </div>
+<body class="text-gray-800">
 
-  <!-- Chatbot floating button -->
-  <button id="chatbot-toggle" class="fixed bottom-6 right-6 bg-indigo-600 text-white rounded-full p-4 shadow-lg">💬</button>
-  <div id="chatbot" class="hidden fixed bottom-20 right-6 bg-white w-80 h-96 shadow-xl rounded-lg flex flex-col">
-    <div class="p-3 border-b font-bold">AI Chatbot</div>
-    <div id="chat-messages" class="flex-1 p-3 overflow-y-auto text-sm"></div>
-    <div class="p-2 border-t flex">
-      <input id="chat-input" type="text" placeholder="พิมพ์ข้อความ..." class="flex-1 border rounded px-2 py-1 text-sm">
-      <button id="chat-send" class="ml-2 bg-indigo-600 text-white px-3 py-1 rounded">ส่ง</button>
+    <div class="container mx-auto p-4 sm:p-6 md:p-8">
+        <!-- Header -->
+        <div class="bg-white rounded-t-2xl shadow-lg p-6 md:p-8">
+             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                 <div>
+                     <h1 class="text-2xl md:text-3xl font-bold text-gray-900">ระบบจัดการ Pickup Points</h1>
+                     <p class="text-gray-500 mt-1">ข้อมูลจาก Google Sheet (Live)</p>
+                 </div>
+                 <button id="refreshBtn" class="mt-4 sm:mt-0 flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-md hover:shadow-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:-translate-y-0.5">
+                     <i class="fas fa-sync-alt"></i>
+                     <span>รีเฟรชข้อมูล</span>
+                 </button>
+             </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="bg-white shadow-lg rounded-b-2xl mb-8 px-6 md:px-8">
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                    <button id="tab-dashboard" class="tab-btn active border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        <i class="fas fa-th-large mr-2"></i>หน้าหลัก
+                    </button>
+                    <button id="tab-employee-list" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        <i class="fas fa-users mr-2"></i>ข้อมูลพนักงาน
+                    </button>
+                    <button id="tab-pickup-points" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        <i class="fas fa-map-marker-alt mr-2"></i>ข้อมูล Pickup Points
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Search Input -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-8">
+            <div class="relative">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="searchInput" placeholder="ค้นหาข้อมูล..." class="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-shadow">
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div id="tab-content-dashboard">
+            <!-- Overall Progress -->
+            <div id="overall-progress-section" class="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-8">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">ภาพรวมความคืบหน้า (เฉพาะพนักงานที่ทำงานวันนี้)</h3>
+                <div class="flex items-center gap-4">
+                    <div class="w-full bg-gray-200 rounded-full h-6 shadow-inner">
+                        <div id="overall-progress-bar" class="bg-gradient-to-r from-green-400 to-blue-500 h-6 rounded-full text-white text-xs font-bold flex items-center justify-center transition-all duration-500" style="width: 0%;">
+                            0%
+                        </div>
+                    </div>
+                    <div id="overall-progress-text" class="text-sm font-semibold text-gray-600 w-28 text-right">
+                        (0/0)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls: AI, Grouping -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-8">
+                <!-- AI Suggestion Button -->
+                <div class="mb-6">
+                     <button id="aiSuggestBtn" class="w-full text-center px-4 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg shadow-md hover:shadow-lg hover:from-purple-600 hover:to-indigo-600 transition-all duration-300 transform hover:-translate-y-0.5 font-semibold">
+                         <i class="fas fa-brain mr-2"></i> ✨ วิเคราะห์และแนะนำกลุ่มโดย AI
+                     </button>
+                </div>
+                <!-- Grouping Form -->
+                <div id="group-data-section" class="bg-indigo-50 p-5 rounded-xl border border-indigo-200">
+                    <h3 class="font-bold text-lg mb-4 text-indigo-800">รวมข้อมูลพนักงาน</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <div class="flex flex-col md:col-span-2">
+                            <label for="groupIds" class="text-sm font-medium text-gray-600 mb-1">ใส่ Driver IDs (คั่นด้วยลูกน้ำ ,)</label>
+                            <input type="text" id="groupIds" placeholder="เช่น 101,102,105" class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-300 transition">
+                        </div>
+                        <button id="groupBtn" class="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-2 rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 transform hover:-translate-y-0.5 shadow-md hover:shadow-lg flex items-center justify-center space-x-2 h-10">
+                            <i class="fas fa-users"></i>
+                            <span>รวมข้อมูล</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="loading-dashboard" class="text-center py-10 hidden">
+                <svg class="animate-spin h-10 w-10 text-blue-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="mt-2 text-gray-600">กำลังโหลดข้อมูล...</p>
+            </div>
+            <div id="employeeCardsContainer"></div>
+            <p id="noResults-dashboard" class="text-center text-gray-500 py-8 hidden text-lg">ไม่พบข้อมูลที่ตรงกัน</p>
+        </div>
+
+        <div id="tab-content-employee-list" class="hidden">
+             <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                 <div class="overflow-x-auto">
+                     <table class="min-w-full divide-y divide-gray-200">
+                         <thead class="bg-gray-50">
+                             <tr>
+                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver ID</th>
+                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อพนักงาน</th>
+                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">เวลางาน</th>
+                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วันหยุด</th>
+                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">จำนวนงาน</th>
+                             </tr>
+                         </thead>
+                         <tbody id="employeeTableBody" class="bg-white divide-y divide-gray-200"></tbody>
+                     </table>
+                 </div>
+                 <p id="noResults-list" class="text-center text-gray-500 py-8 hidden text-lg">ไม่พบข้อมูลที่ตรงกัน</p>
+              </div>
+        </div>
+
+        <div id="tab-content-pickup-points" class="hidden">
+             <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                 <div class="overflow-x-auto">
+                     <table class="min-w-full divide-y divide-gray-200">
+                         <thead class="bg-gray-50">
+                             <tr>
+                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pickup Point ID</th>
+                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อร้าน</th>
+                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ที่อยู่</th>
+                                 <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">คัดลอก</th>
+                             </tr>
+                         </thead>
+                         <tbody id="pickupPointsTableBody" class="bg-white divide-y divide-gray-200"></tbody>
+                     </table>
+                 </div>
+                 <p id="noResults-points" class="text-center text-gray-500 py-8 hidden text-lg">ไม่พบข้อมูลที่ตรงกัน</p>
+              </div>
+        </div>
     </div>
-  </div>
 
-  <script type="module" src="script.js"></script>
+    <!-- Floating Action Button for Reset All -->
+    <button id="resetAllBtn" class="fixed bottom-6 right-6 bg-gradient-to-br from-pink-500 to-rose-500 text-white w-16 h-16 rounded-full shadow-xl flex items-center justify-center text-2xl hover:from-pink-600 hover:to-rose-600 transition-all duration-300 transform hover:scale-110 hover:rotate-12">
+        <i class="fas fa-trash-alt"></i>
+    </button>
+    
+    <!-- Modals -->
+    <div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl p-8 shadow-2xl w-full max-w-md mx-4 transform transition-all scale-95 opacity-0" id="confirmationModalBox">
+            <h2 class="text-xl font-bold mb-4">ยืนยันการรีเซ็ต</h2>
+            <p class="text-gray-600 mb-6">คุณแน่ใจหรือไม่ว่าต้องการรีเซ็ตสถานะ "คัดลอกแล้ว" ทั้งหมดของวันนี้? การกระทำนี้ไม่สามารถย้อนกลับได้</p>
+            <div class="flex justify-end space-x-4">
+                <button id="cancelReset" class="px-6 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition-colors">ยกเลิก</button>
+                <button id="confirmReset" class="px-6 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors">ยืนยันการรีเซ็ต</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="aiSuggestionModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl p-6 shadow-2xl w-full max-w-2xl mx-4 flex flex-col transform transition-all scale-95 opacity-0" style="max-height: 90vh;" id="aiSuggestionModalBox">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                 <h2 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-600">✨ AI แนะนำกลุ่มพนักงาน</h2>
+                 <button id="closeAiSuggestionModal" class="text-gray-400 hover:text-gray-800 text-3xl transition-colors">&times;</button>
+            </div>
+            <div id="aiSuggestionContent" class="overflow-y-auto flex-grow pr-2">
+                <div id="aiLoading" class="text-center py-10">
+                    <svg class="animate-spin h-8 w-8 text-blue-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="mt-3 text-gray-600">กำลังวิเคราะห์ข้อมูลทั้งหมด...</p>
+                </div>
+                <div id="aiResult" class="text-gray-700 text-base leading-relaxed hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="routePlanModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl p-6 shadow-2xl w-full max-w-lg mx-4 flex flex-col transform transition-all scale-95 opacity-0" style="max-height: 90vh;" id="routePlanModalBox">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                 <h2 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-600">✨ แผนเส้นทางโดย AI</h2>
+                 <button id="closeRoutePlanModal" class="text-gray-400 hover:text-gray-800 text-3xl transition-colors">&times;</button>
+            </div>
+            <div class="modal-content overflow-y-auto flex-grow pr-2">
+                <div id="routePlanLoading" class="text-center py-10">
+                    <svg class="animate-spin h-8 w-8 text-blue-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="mt-3 text-gray-600">กำลังสร้างแผนเส้นทางอัจฉริยะ...</p>
+                </div>
+                <pre id="routePlanResult" class="text-gray-700 text-base leading-relaxed hidden"></pre>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script type="module" src="script.js"></script>
 </body>
 </html>
