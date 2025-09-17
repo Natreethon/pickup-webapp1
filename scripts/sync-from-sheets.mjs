@@ -14,6 +14,16 @@ async function fetchCSV(url) {
   return parsed.data;
 }
 
+async function readJSON(path, fallback = []) {
+  try {
+    const raw = await fs.readFile(path, 'utf8');
+    return JSON.parse(raw);
+  } catch (err) {
+    if (err.code === 'ENOENT') return fallback;
+    throw err;
+  }
+}
+
 function toEmployeesAggregated(assignments) {
   const byId = new Map();
   for (const r of assignments) {
@@ -52,17 +62,36 @@ function toEmployeesAggregated(assignments) {
 }
 
 async function main() {
-  const [employeesSheet, pickupPointsSheet, assignmentsSheet] = await Promise.all([
-    fetchCSV(EMPLOYEES_CSV_URL).catch(()=>[]),
-    fetchCSV(PICKUP_POINTS_CSV_URL).catch(()=>[]),
-    fetchCSV(ASSIGNMENTS_CSV_URL)
-  ]);
+  const usingSheets = Boolean(ASSIGNMENTS_CSV_URL);
 
-  await fs.writeFile('employee_assignments.json', JSON.stringify(assignmentsSheet, null, 2));
-  await fs.writeFile('pickup_points.json', JSON.stringify(pickupPointsSheet, null, 2));
-  const employeesAgg = toEmployeesAggregated(assignmentsSheet);
-  await fs.writeFile('employees.json', JSON.stringify(employeesAgg, null, 2));
+  let employeesSheet = [];
+  let pickupPointsSheet = [];
+  let assignmentsSheet = [];
+  let employeesAgg = [];
 
-  console.log('✅ Synced *.json updated');
+  if (usingSheets) {
+    [employeesSheet, pickupPointsSheet, assignmentsSheet] = await Promise.all([
+      EMPLOYEES_CSV_URL ? fetchCSV(EMPLOYEES_CSV_URL).catch(()=>[]) : Promise.resolve([]),
+      PICKUP_POINTS_CSV_URL ? fetchCSV(PICKUP_POINTS_CSV_URL).catch(()=>[]) : Promise.resolve([]),
+      fetchCSV(ASSIGNMENTS_CSV_URL)
+    ]);
+    employeesAgg = toEmployeesAggregated(assignmentsSheet);
+  } else {
+    [assignmentsSheet, pickupPointsSheet, employeesAgg] = await Promise.all([
+      readJSON('employee_assignments.json', []),
+      readJSON('pickup_points.json', []),
+      readJSON('employees.json', [])
+    ]);
+
+    if ((!employeesAgg || employeesAgg.length === 0) && Array.isArray(assignmentsSheet) && assignmentsSheet.length) {
+      employeesAgg = toEmployeesAggregated(assignmentsSheet);
+    }
+  }
+
+  await fs.writeFile('employee_assignments.json', JSON.stringify(assignmentsSheet ?? [], null, 2));
+  await fs.writeFile('pickup_points.json', JSON.stringify(pickupPointsSheet ?? [], null, 2));
+  await fs.writeFile('employees.json', JSON.stringify(employeesAgg ?? [], null, 2));
+
+  console.log(`✅ Synced *.json updated using ${usingSheets ? 'live Google Sheets' : 'local fallback'} data`);
 }
 main().catch(e => { console.error(e); process.exit(1); });
